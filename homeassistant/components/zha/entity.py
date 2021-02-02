@@ -40,6 +40,7 @@ class BaseZhaEntity(LogMixin, entity.Entity):
         """Init ZHA entity."""
         self._name: str = ""
         self._force_update: bool = False
+        self._tampered: bool = False
         self._should_poll: bool = False
         self._unique_id: str = unique_id
         self._state: Any = None
@@ -72,6 +73,11 @@ class BaseZhaEntity(LogMixin, entity.Entity):
     def force_update(self) -> bool:
         """Force update this entity."""
         return self._force_update
+    
+    @property
+    def tampered(self) -> bool:
+        """Force update this entity."""
+        return self._tampered
 
     @property
     def should_poll(self) -> bool:
@@ -159,6 +165,11 @@ class ZhaEntity(BaseZhaEntity, RestoreEntity):
         """Return entity availability."""
         return self._zha_device.available
 
+    @property
+    def tampered(self) -> bool:
+        """Return entity tampered status."""
+        return self._zha_device.tampered
+
     async def async_added_to_hass(self) -> None:
         """Run when about to be added to hass."""
         self.remove_future = asyncio.Future()
@@ -220,6 +231,7 @@ class ZhaGroupEntity(BaseZhaEntity):
         """Initialize a light group."""
         super().__init__(unique_id, zha_device, **kwargs)
         self._available = False
+        self._tampered = False
         self._group = zha_device.gateway.groups.get(group_id)
         self._name = f"{self._group.name}_zha_group_0x{group_id:04x}"
         self._group_id: int = group_id
@@ -231,6 +243,11 @@ class ZhaGroupEntity(BaseZhaEntity):
     def available(self) -> bool:
         """Return entity availability."""
         return self._available
+
+    @property
+    def tampered(self) -> bool:
+        """Return entity tampered."""
+        return self._tampered
 
     async def _handle_group_membership_changed(self):
         """Handle group membership changed."""
