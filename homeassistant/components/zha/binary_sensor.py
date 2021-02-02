@@ -23,6 +23,7 @@ from .core.const import (
     CHANNEL_ACCELEROMETER,
     CHANNEL_OCCUPANCY,
     CHANNEL_ON_OFF,
+    CHANNEL_TAMPER,
     CHANNEL_ZONE,
     DATA_ZHA,
     DATA_ZHA_DISPATCHERS,
@@ -94,6 +95,13 @@ class BinarySensor(ZhaEntity, BinarySensorEntity):
         return self._state
 
     @property
+    def is_tampered(self) -> bool:
+        """Return True if the switch is tampered."""
+        if self._tampered is None:
+            return False
+        return self._tampered
+
+    @property
     def device_class(self) -> str:
         """Return device class from component DEVICE_CLASSES."""
         return self._device_class
@@ -113,6 +121,11 @@ class BinarySensor(ZhaEntity, BinarySensorEntity):
         attr_value = await self._channel.get_attribute_value(attribute)
         if attr_value is not None:
             self._state = attr_value
+            
+        attribute = getattr(self._channel, "value_attribute", "tampered")
+        attr_value = await self._channel.get_attribute_value(attribute)
+        if attr_value is not None:
+            self._tampered = attr_value
 
 
 @STRICT_MATCH(channel_names=CHANNEL_ACCELEROMETER)
@@ -146,6 +159,7 @@ class Opening(BinarySensor):
     and model is not None
     and model.find("motion") != -1,
 )
+
 @STRICT_MATCH(
     channel_names=CHANNEL_ON_OFF,
     manufacturers="Philips",
