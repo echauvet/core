@@ -235,6 +235,7 @@ DEVICE_CLASS_VOLTAGE = "voltage"
 # #### STATES ####
 STATE_ON = "on"
 STATE_OFF = "off"
+STATE_TAMPERED = "tampered"
 STATE_HOME = "home"
 STATE_NOT_HOME = "not_home"
 STATE_UNKNOWN = "unknown"

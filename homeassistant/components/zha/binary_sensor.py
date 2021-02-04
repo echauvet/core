@@ -10,6 +10,7 @@ from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_OCCUPANCY,
     DEVICE_CLASS_OPENING,
     DEVICE_CLASS_SMOKE,
+    DEVICE_CLASS_TAMPER,
     DEVICE_CLASS_VIBRATION,
     DOMAIN,
     BinarySensorEntity,
@@ -102,6 +103,13 @@ class BinarySensor(ZhaEntity, BinarySensorEntity):
         return self._tampered
 
     @property
+    def is_lowbattery(self) -> bool:
+        """Return True if the switch is low battery."""
+        if self._lowbattery is None:
+            return False
+        return self._lowbattery
+
+    @property
     def device_class(self) -> str:
         """Return device class from component DEVICE_CLASSES."""
         return self._device_class
@@ -120,12 +128,9 @@ class BinarySensor(ZhaEntity, BinarySensorEntity):
         attribute = getattr(self._channel, "value_attribute", "on_off")
         attr_value = await self._channel.get_attribute_value(attribute)
         if attr_value is not None:
-            self._state = attr_value
-            
-        attribute = getattr(self._channel, "value_attribute", "tampered")
-        attr_value = await self._channel.get_attribute_value(attribute)
-        if attr_value is not None:
-            self._tampered = attr_value
+            self._state = attr_value & 3
+            self._tampered = attr_value & 4
+            self._lowbattery = attr_value & 8
 
 
 @STRICT_MATCH(channel_names=CHANNEL_ACCELEROMETER)
@@ -184,8 +189,11 @@ class IASZone(BinarySensor):
         return CLASS_MAPPING.get(self._channel.cluster.get("zone_type"))
 
     async def async_update(self):
-        """Attempt to retrieve on off state from the binary sensor."""
+        """Attempt to retrieve on off, tampered and lowbattery of IASZone state from the binary sensor."""
         await super().async_update()
         value = await self._channel.get_attribute_value("zone_status")
         if value is not None:
             self._state = value & 3
+            self._tampered = value & 4
+            self._lowbattery = value & 8
+

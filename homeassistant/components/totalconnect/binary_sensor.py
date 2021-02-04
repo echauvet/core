@@ -83,6 +83,6 @@ class TotalConnectBinarySensor(BinarySensorEntity):
             "zone_id": self._zone_id,
             "location_id": self._location_id,
             "low_battery": self._is_low_battery,
-            "tampered": self._is_tampered,
+            "tampered": self._is_tampered
         }
         return attributes
