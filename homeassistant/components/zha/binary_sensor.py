@@ -10,7 +10,6 @@ from homeassistant.components.binary_sensor import (
     DEVICE_CLASS_OCCUPANCY,
     DEVICE_CLASS_OPENING,
     DEVICE_CLASS_SMOKE,
-    DEVICE_CLASS_TAMPER,
     DEVICE_CLASS_VIBRATION,
     DOMAIN,
     BinarySensorEntity,
